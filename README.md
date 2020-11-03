@@ -38,5 +38,35 @@
    kubectl get pod -n mongodb 
   ```
 - 步骤二：部署OpsManager实例
+  - 2.1 设置kubectl context信息，让kubectl默认工作在mongodb命名空间下。
+  ```
+  kubectl config set-context $(kubectl config current-context) --namespace=mongodb
+  ```
+  - 2.2 创建Kubernetes Secret，新创建的两个Secret用于存放OpsManager用户名和密码，以及OpsManager Applicaton Database密码。当OpsManager成功创建后，用户可用该OpsManager的用户名和密码登录并OpsManager，可用OpsManager Application Database的密码对OpsManager的Databse进行维护。
+  ```
+  ## 存放OpsManager用户名密码
+  kubectl create secret generic om-admin-secret \
+  --from-literal=Username=admin \
+  --from-literal=Password=Admin@123 \
+  --from-literal=FirstName=San\
+  --from-literal=LastName=Zhang
+  ## 存放OpsManager Applicaton Database
+  kubectl create secret generic om-db-user-secret \
+  --from-literal=password=Admin@12345
+  ```
+  -2.2 通过OpsManager yaml配置文件创建OpsManager实例。若需要进一步定制化配置OpsManager，请查看[详细配置]（https://docs.mongodb.com/kubernetes-operator/master/reference/k8s-operator-om-specification/#optional-onprem-resource-settings）
+  ```
+  kubectl apply -f kubernetes/mongodb-ops-manager.yml
+  ```
+  -2.3 查看OpsManager部署状态。
+  ```
+  kubectl get om mongodb-ops-manager -o yaml
+  kubectl get pod
+  ```
+  -2.4 查询OpsManager url，访问OpsManager界面。默认情况下，MongoDB Enterprise Operator会自动为OpsManager创建类型为LoadBalancer的Kubernetes Service，用户可通过该Service对应的ELB URL访问OpsManager图形界面。利用2.2步创建的OpsManager用户名和密码登录OpsManager，查看OpsManager支持的功能。
+  ```
+  kubectl get svc |grep mongodb-ops-manager-svc-ext 
+  ```
 
-  
+- 步骤三：部署MongoDB Database
+  -3.1 通过MongoDB yaml文件创建MongoDB集群，MongoDB Enterprise Operator支持以[Standalone](https://docs.mongodb.com/kubernetes-operator/master/tutorial/deploy-standalone/)、[Replica Set](https://docs.mongodb.com/kubernetes-operator/master/tutorial/deploy-replica-set/)、[Sharded Cluster](https://docs.mongodb.com/kubernetes-operator/master/tutorial/deploy-replica-set/)三种模式部署集群，用户可以在MongoDB yaml文件中定义相应的类型。
