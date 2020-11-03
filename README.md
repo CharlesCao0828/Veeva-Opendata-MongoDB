@@ -54,7 +54,7 @@
   kubectl create secret generic om-db-user-secret \
   --from-literal=password=Admin@12345
   ```
-  - 2.3 通过OpsManager yaml配置文件创建OpsManager实例。若需要进一步定制化配置OpsManager，请查看[详细配置]（https://docs.mongodb.com/kubernetes-operator/master/reference/k8s-operator-om-specification/ ）
+  - 2.3 通过OpsManager yaml配置文件创建OpsManager实例。若需要进一步定制化配置OpsManager，请查看[详细配置]（https://docs.mongodb.com/kubernetes-operator/master/reference/k8s-operator-om-specification/）
   ```
   kubectl apply -f kubernetes/mongodb-ops-manager.yml
   ```
