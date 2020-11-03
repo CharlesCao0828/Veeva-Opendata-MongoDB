@@ -33,8 +33,10 @@
   helm install mongodb helm_chart \
      --values helm_chart/values.yaml
   ```
-  - 1.4 运行命令查看MongoDB Enterprise Operator安装结果。
+  - 1.4 运行命令查看MongoDB Enterprise Operator安装结果，MongoDB Enterprise Operator会以pod的形式运行在mongodb namespace下。
   ```
-  
+   kubectl get pod -n mongodb 
+  ```
+- 步骤二：部署OpsManager实例
 
-  - 1.4 运行命令查看MongoDB Enterprise Operator安装结果。
+  
