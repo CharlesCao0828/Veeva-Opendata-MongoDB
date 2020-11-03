@@ -18,5 +18,7 @@
 ### 实验步骤
 - 步骤一：安装MongoDB Enterprise Operator
   - 1.1 克隆MongoDB Enterprise Operator gihub链接
+  ```
   git clone https://github.com/mongodb/mongodb-enterprise-kubernetes.git
+  ```
   
