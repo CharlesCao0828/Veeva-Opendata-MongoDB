@@ -29,7 +29,12 @@
   ```
   ## 切换路径
   cd mongodb-enterprise-kubernetes/
-  helm install <chart-name> helm_chart \
+  ## 通过helm安装MongoDB Enterprise Operator
+  helm install mongodb helm_chart \
      --values helm_chart/values.yaml
   ```
+  - 1.4 运行命令查看MongoDB Enterprise Operator安装结果。
+  ```
   
+
+  - 1.4 运行命令查看MongoDB Enterprise Operator安装结果。
