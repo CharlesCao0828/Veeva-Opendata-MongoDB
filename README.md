@@ -54,19 +54,19 @@
   kubectl create secret generic om-db-user-secret \
   --from-literal=password=Admin@12345
   ```
-  -2.2 通过OpsManager yaml配置文件创建OpsManager实例。若需要进一步定制化配置OpsManager，请查看[详细配置]（https://docs.mongodb.com/kubernetes-operator/master/reference/k8s-operator-om-specification/#optional-onprem-resource-settings）
+  - 2.3 通过OpsManager yaml配置文件创建OpsManager实例。若需要进一步定制化配置OpsManager，请查看[详细配置]（https://docs.mongodb.com/kubernetes-operator/master/reference/k8s-operator-om-specification/#optional-onprem-resource-settings）
   ```
   kubectl apply -f kubernetes/mongodb-ops-manager.yml
   ```
-  -2.3 查看OpsManager部署状态。
+  - 2.4 查看OpsManager部署状态。
   ```
   kubectl get om mongodb-ops-manager -o yaml
   kubectl get pod
   ```
-  -2.4 查询OpsManager url，访问OpsManager界面。默认情况下，MongoDB Enterprise Operator会自动为OpsManager创建类型为LoadBalancer的Kubernetes Service，用户可通过该Service对应的ELB URL访问OpsManager图形界面。利用2.2步创建的OpsManager用户名和密码登录OpsManager，查看OpsManager支持的功能。
+  - 2.5 查询OpsManager url，访问OpsManager界面。默认情况下，MongoDB Enterprise Operator会自动为OpsManager创建类型为LoadBalancer的Kubernetes Service，用户可通过该Service对应的ELB URL访问OpsManager图形界面。利用2.2步创建的OpsManager用户名和密码登录OpsManager，查看OpsManager支持的功能。
   ```
   kubectl get svc |grep mongodb-ops-manager-svc-ext 
   ```
 
 - 步骤三：部署MongoDB Database
-  -3.1 通过MongoDB yaml文件创建MongoDB集群，MongoDB Enterprise Operator支持以[Standalone](https://docs.mongodb.com/kubernetes-operator/master/tutorial/deploy-standalone/)、[Replica Set](https://docs.mongodb.com/kubernetes-operator/master/tutorial/deploy-replica-set/)、[Sharded Cluster](https://docs.mongodb.com/kubernetes-operator/master/tutorial/deploy-replica-set/)三种模式部署集群，用户可以在MongoDB yaml文件中定义相应的类型。
+  - 3.1 通过MongoDB yaml文件创建MongoDB集群，MongoDB Enterprise Operator支持以[Standalone](https://docs.mongodb.com/kubernetes-operator/master/tutorial/deploy-standalone/)、[Replica Set](https://docs.mongodb.com/kubernetes-operator/master/tutorial/deploy-replica-set/)、[Sharded Cluster](https://docs.mongodb.com/kubernetes-operator/master/tutorial/deploy-replica-set/)三种模式部署集群，用户可以在MongoDB yaml文件中定义相应的类型。
