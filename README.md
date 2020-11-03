@@ -17,8 +17,19 @@
 
 ### 实验步骤
 - 步骤一：安装MongoDB Enterprise Operator
-  - 1.1 克隆MongoDB Enterprise Operator gihub链接
+  - 1.1 克隆MongoDB Enterprise Operator gihub链接.
   ```
   git clone https://github.com/mongodb/mongodb-enterprise-kubernetes.git
+  ```
+  - 1.2 创建Kubernetes Namespace，MongoDB Operator与MongoDB集群都将运行在此命名空间下。
+  ```
+  kubectl create namespace mongodb
+  ```
+  - 1.3 通过helm工具安装MongoDB Enterprise Operator
+  ```
+  ## 切换路径
+  cd mongodb-enterprise-kubernetes/
+  helm install <chart-name> helm_chart \
+     --values helm_chart/values.yaml
   ```
   
