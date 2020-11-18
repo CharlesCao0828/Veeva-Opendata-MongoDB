@@ -1,10 +1,193 @@
 # MongoDB on Kubernetes
 
-## 实验内容
+## Lab1.实验内容
+### 通过Helm安装类型为Standalone的Mongodb
+### 实验步骤
+- 步骤一：添加镜像仓库
+  ```
+  curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+  chmod 700 get_helm.sh
+  ./get_helm.sh
+  helm repo add bitnami https://charts.bitnami.com/bitnami
+  ```
+- 步骤二：安装类型为standalone的MongoDB数据库
+  ```
+  helm install mongo-standalone bitnami/mongodb --set architecture=standalone,auth.rootPassword=Mongo@12345,persistence.size=20Gi
+  ```
+- 步骤三：查看安装状态与结果
+  ```
+  ## 查看pvc创建
+  kubectl get pvc
+
+  ## 查看Mongodb节点
+  kubectl get pod
+
+  ## 查看kubernetes service
+  kubectl get svc
+  ```
+- 步骤四： 创建MongoDB客户端，并登录MongoDB集群。
+  ```
+  ## 创建MongoDB客户端
+  kubectl run -i --rm --tty percona-client --image=percona/percona-server-mongodb:4.2.8-8 --restart=Never -- bash -il
+
+  ## 登录MongoDB集群
+  mongo admin --host mongo-standalone-mongodb -u root -p Mongo@12345
+
+  ## 创建数据库
+  use online-shop
+
+  ## 创建集合并插入文档
+  db.inventory.insertMany([
+    { item: "journal", qty: 25, status: "A", size: { h: 14, w: 21, uom: "cm" }, tags: [ "blank", "red" ] },
+    { item: "notebook", qty: 50, status: "A", size: { h: 8.5, w: 11, uom: "in" }, tags: [ "red", "blank" ] },
+    { item: "paper", qty: 10, status: "D", size: { h: 8.5, w: 11, uom: "in" }, tags: [ "red", "blank", "plain" ] },
+    { item: "planner", qty: 0, status: "D", size: { h: 22.85, w: 30, uom: "cm" }, tags: [ "blank", "red" ] },
+    { item: "postcard", qty: 45, status: "A", size: { h: 10, w: 15.25, uom: "cm" }, tags: [ "blue" ] }
+  ]);
+
+  ## 查询文档
+  db.inventory.find({})
+  ```
+- 步骤五： 删除MongoDB standalone实例。
+  ```
+  ## 删除helm安装版本
+  helm ls
+  helm uninstall mongo-standalone
+
+  ## 查询pod
+  kubectl get pod
+
+  ## 查询pvc
+  kubectl get pvc
+  ```
+
+******
+## Lab2.实验内容
+### 通过Helm安装类型为Replicaset的MongoDB
+### 实验步骤
+- 步骤一：通过Helm安装MongoDB Replicaset集群
+  ```
+  helm install mongo-replicaset bitnami/mongodb --set architecture=replicaset,auth.rootPassword=Mongo@12345,persistence.size=20Gi,replicaCount=2
+  ```
+- 步骤二：查看Kubernetes资源与MongoDB集群创建状态
+  ```
+  ## 查看pvc创建
+  kubectl get pvc
+
+  ## 查看Mongodb节点
+  kubectl get pod
+
+  ## 查看kubernetes service
+  kubectl get svc
+  ```
+- 步骤三：待集群节点全部正常运行后， 创建MongoDB客户端，并登录MongoDB集群。
+  ```
+  ## 创建MongoDB客户端
+  kubectl run -i --rm --tty percona-client --image=percona/percona-server-mongodb:4.2.8-8 --restart=Never -- bash -il
+
+  ## 登录MongoDB集群
+  mongo admin --host "mongo-replicaset-mongodb-0.mongo-replicaset-mongodb-headless.default.svc.cluster.local,mongo-replicaset-mongodb-1.mongo-replicaset-mongodb-headless.default.svc.cluster.local," --authenticationDatabase admin -u root -p Mongo@12345
+
+  ## 查看MongoDB Replicaset 状态
+  rs.status()
+
+  ## 查看slave节点数量
+  rs.printSlaveReplicationInfo()
+  ```
+- 步骤四：调整MongoDB集群Replicas数量，对集群进行扩缩容
+  ```
+  ## 退出mongo shell客户端
+  exit 
+
+  ## 获取MONGODB_REPLICA_SET_KEY
+  kubectl get secret --namespace default mongo-replicaset-mongodb -o jsonpath="{.data.mongodb-replica-set-key}" | base64 --decode
+  
+  ## 更新helm，将MongoDB Replicaset的数量扩展为3个
+  helm upgrade  mongo-replicaset bitnami/mongodb --set architecture=replicaset,auth.rootPassword=Mongo@12345,persistence.size=20Gi,replicaCount=3,auth.replicaSetKey=<MONGODB_REPLICA_SET_KEY>
+  ```
+- 步骤五：等待数分钟后查看结果
+  ```
+  ## 创建MongoDB客户端
+  kubectl run -i --rm --tty percona-client --image=percona/percona-server-mongodb:4.2.8-8 --restart=Never -- bash -il
+  
+  ## 登录MongoDB集群
+  mongo admin --host "mongo-replicaset-mongodb-0.mongo-replicaset-mongodb-headless.default.svc.cluster.local,mongo-replicaset-mongodb-1.mongo-replicaset-mongodb-headless.default.svc.cluster.local,mongo-replicaset-mongodb-2.mongo-replicaset-mongodb-headless.default.svc.cluster.local," --authenticationDatabase admin -u root -p Mongo@12345
+
+  ## 查看MongoDB Replicaset 状态
+  rs.status()
+
+  ## 查看MongoDB Slave节点数量
+  rs.printSlaveReplicationInfo()
+
+  ## 删除mongo-replicaset
+  helm uninstall mongo-replicaset
+  ```
+
+
+******
+## Lab3.实验内容
+### 通过Helm安装类型为Sharded的MongoDB集群
+### 实验步骤
+- 步骤一：通过Helm安装类型为Sharded的MongoDB集群
+  ```
+  helm install mongo-sharded bitnami/mongodb-sharded --set shards=1,mongos.replicas=1,mongodbRootPassword=Mongo@12345,shardsvr.persistence.size=20
+  ```
+- 步骤二：查看Kubernetes资源与MongoDB集群创建状态
+  ```
+  ## 查看pvc创建
+  kubectl get pvc
+
+  ## 查看Mongodb节点
+  kubectl get pod
+
+  ## 查看kubernetes service
+  kubectl get svc
+  ```
+- 步骤三：待集群节点全部正常运行后， 创建MongoDB客户端，并登录MongoDB集群。
+  ```
+  ## 创建MongoDB客户端
+  kubectl run -i --rm --tty percona-client --image=percona/percona-server-mongodb:4.2.8-8 --restart=Never -- bash -il
+
+  ## 登录MongoDB集群
+  mongo admin --host mongo-sharded-mongodb-sharded --authenticationDatabase admin  -u root -p Mongo@12345
+  ```
+- 步骤四：查看MongoDB集群shard信息
+  ```
+  ## 在MongoDB shell里执行
+  sh.status()
+  ```
+- 步骤五：尝试更改MongoDB Shard的Replica数量，提升MongoDB集群的高可用性。
+  ```
+  kubectl get secret mongo-sharded-mongodb-sharded -o jsonpath="{.data.mongodb-replica-set-key}" | base64 --decode
+  helm upgrade mongo-sharded bitnami/mongodb-sharded --set shards=2,shardsvr.dataNode.replicas=2,mongodbRootPassword=Mongo@12345,shardsvr.persistence.size=20,replicaSetKey=<MONGODB_REPLICA_SET_KEY>
+  ```
+- 步骤六：查看Kubernetes资源，确认MongoDB新的Shard节点与存储卷被创建。
+  ```
+  ## 查看pvc创建
+  kubectl get pvc
+
+  ## 查看Mongodb节点
+  kubectl get pod
+
+  ## 查看kubernetes service
+  kubectl get svc
+  ```
+- 步骤七：查看新创建的MongoDB节点日志。
+  ```
+  kubectl logs mongo-sharded-mongodb-sharded-shard0-data-1
+
+  ## 登录MongoDB集群
+  mongo admin --host mongo-sharded-mongodb-sharded --authenticationDatabase admin  -u root -p Mongo@12345
+
+  ## 查看MongoDB集群shard状态
+  sh.status()
+  ```
+
+******
+## Lab4.实验内容
 
 通过业界常用的两种MongoDB Operator（MongoDB Enterprise Operator 以及 Percona Kubernetes Operator）创建并管理MongoDB集群，完成MongoDB集群创建、容量调整、集群使用、数据备份、集群监控等任务，同时并对比两种Operator的优劣势。
 
-## 实验一
 ### 利用MongoDB Enterprise Operator管理MongoDB集群
 
 ### MongoDB Enterprise Operator描述
@@ -29,6 +212,7 @@
   ```
   ## 切换路径
   cd mongodb-enterprise-kubernetes/
+
   ## 通过helm安装MongoDB Enterprise Operator
   helm install mongodb helm_chart \
      --values helm_chart/values.yaml
@@ -50,6 +234,7 @@
   --from-literal=Password=Admin@123 \
   --from-literal=FirstName=San\
   --from-literal=LastName=Zhang
+
   ## 存放OpsManager Applicaton Database
   kubectl create secret generic om-db-user-secret \
   --from-literal=password=Admin@12345
